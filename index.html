@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>REA Studio</title>
+  <meta name="description" content="REA Studio — 브라우저에서 동작하는 무료 오픈소스 멀티트랙 오디오 워크스테이션">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header id="topbar">
+    <div class="brand"><span class="logo">◆</span> REA <b>Studio</b></div>
+    <nav class="menu">
+      <button data-act="new" title="새 세션">새 세션</button>
+      <button data-act="open" title="프로젝트 열기 (Ctrl+O)">열기…</button>
+      <button data-act="save" title="프로젝트 파일로 저장 (Ctrl+S)">저장</button>
+      <span class="sep"></span>
+      <button data-act="import" title="오디오 파일 가져오기 (Ctrl+I)">오디오 가져오기…</button>
+      <button data-act="addTrack" title="새 오디오 트랙 (Ctrl+Shift+N)">+ 트랙</button>
+      <button data-act="bounce" title="믹스다운을 WAV로 내보내기 (Ctrl+Shift+B)">바운스…</button>
+      <span class="sep"></span>
+      <button data-act="undo" title="실행 취소 (Ctrl+Z)">↶</button>
+      <button data-act="redo" title="다시 실행 (Ctrl+Shift+Z)">↷</button>
+      <button data-act="help" title="단축키 (?)">단축키</button>
+    </nav>
+    <input id="project-name" spellcheck="false" title="세션 이름">
+  </header>
+
+  <div id="transport">
+    <div class="group transport-buttons">
+      <button data-act="rtz" title="처음으로 (Home / Enter)">⏮</button>
+      <button data-act="rew" title="한 마디 뒤로">⏪</button>
+      <button data-act="ffw" title="한 마디 앞으로">⏩</button>
+      <button data-act="end" title="세션 끝으로 (End)">⏭</button>
+      <button data-act="stop" id="btn-stop" title="정지">■</button>
+      <button data-act="play" id="btn-play" title="재생 / 정지 (Space)">▶</button>
+      <button data-act="record" id="btn-record" title="녹음 (R)">●</button>
+      <button data-act="loop" id="btn-loop" title="루프 재생 (L)">⟳</button>
+      <button data-act="click" id="btn-click" title="메트로놈 (K)">♩</button>
+    </div>
+
+    <div id="counter-box" title="클릭: 표시 단위 전환">
+      <div id="counter">1|1|000</div>
+      <div id="counter-sub">0:00.000</div>
+    </div>
+
+    <div class="group fields">
+      <label>BPM <input id="bpm" type="number" min="20" max="300" step="1" value="120"></label>
+      <label>박자 <select id="meter">
+        <option value="2">2</option><option value="3">3</option><option value="4" selected>4</option>
+        <option value="5">5</option><option value="6">6</option><option value="7">7</option>
+      </select>/4</label>
+    </div>
+
+    <div class="group" id="tools">
+      <button data-tool="grab" class="on" title="그래버: 이동 · 가장자리 트림 · 위쪽 모서리 페이드 (1)">✋</button>
+      <button data-tool="select" title="셀렉터: 구간 선택 (2)">⌶</button>
+      <button data-tool="split" title="가위: 클릭한 곳에서 자르기 (3)">✂</button>
+    </div>
+
+    <div class="group">
+      <button id="btn-snap" class="on" title="그리드 스냅 (G)">GRID</button>
+      <select id="grid-div" title="그리드 단위">
+        <option value="1">1/4</option>
+        <option value="2">1/8</option>
+        <option value="4">1/16</option>
+        <option value="8">1/32</option>
+      </select>
+    </div>
+
+    <div class="group">
+      <button data-act="zoomOut" title="축소 (-)">−</button>
+      <button data-act="zoomFit" title="전체 보기 (Z)">⤢</button>
+      <button data-act="zoomIn" title="확대 (+)">+</button>
+    </div>
+
+    <div class="group">
+      <button data-act="split" title="분할 (B)">분할</button>
+      <button data-act="marker" title="마커 추가 (M)">마커</button>
+    </div>
+
+    <div class="group views">
+      <button data-view="edit" class="on" title="편집 창 (=)">EDIT</button>
+      <button data-view="mix" title="믹스 창 (=)">MIX</button>
+    </div>
+  </div>
+
+  <main>
+    <section id="edit-view">
+      <div id="edit-scroll">
+        <div id="edit-inner">
+          <div id="ruler-row">
+            <div class="corner">
+              <span>마디 · 시간</span>
+            </div>
+            <canvas id="ruler"></canvas>
+          </div>
+          <div id="tracks-row">
+            <div id="track-headers"></div>
+            <canvas id="lanes"></canvas>
+          </div>
+        </div>
+      </div>
+      <div id="empty-hint">
+        <div class="hint-card">
+          <div class="hint-logo">◆</div>
+          <h2>REA Studio</h2>
+          <p>오디오 파일을 이곳에 끌어다 놓거나<br><b>오디오 가져오기</b> / <b>+ 트랙</b> 으로 시작하세요.</p>
+          <p class="muted">녹음: 트랙의 ● 버튼으로 녹음 대기 → <kbd>R</kbd> · 재생: <kbd>Space</kbd> · 단축키: <kbd>?</kbd></p>
+        </div>
+      </div>
+    </section>
+
+    <section id="mix-view" hidden>
+      <div id="strips"></div>
+    </section>
+  </main>
+
+  <footer id="statusbar">
+    <span id="status"></span>
+    <span id="info"></span>
+  </footer>
+
+  <div class="modal" id="plugin-modal" hidden>
+    <div class="modal-card">
+      <div class="modal-head"><span id="plugin-title"></span><button id="plugin-close" class="x">✕</button></div>
+      <div id="plugin-body" class="modal-body"></div>
+    </div>
+  </div>
+
+  <div class="modal" id="bounce-modal" hidden>
+    <div class="modal-card">
+      <div class="modal-head"><span>믹스다운 바운스 (WAV)</span></div>
+      <div class="modal-body">
+        <p id="bounce-range"></p>
+        <div class="param"><label>비트 심도</label>
+          <select id="bounce-bits"><option value="16">16-bit PCM</option><option value="24" selected>24-bit PCM</option><option value="32">32-bit float</option></select>
+        </div>
+        <div class="param"><label>꼬리(초)</label><input id="bounce-tail" type="number" min="0" max="20" step="0.5" value="2" title="세션 전체 바운스 시 리버브/딜레이 꼬리 길이"></div>
+        <p class="muted">선택 구간이 있으면 그 구간만, 없으면 세션 전체를 렌더링합니다. 솔로/뮤트, 인서트, 페이더, 팬이 모두 반영됩니다.</p>
+        <div class="modal-actions"><button class="btn" id="bounce-cancel">취소</button><button class="btn primary" id="bounce-go">바운스</button></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="help-modal" hidden>
+    <div class="modal-card wide">
+      <div class="modal-head"><span>키보드 단축키</span><button class="x" data-close>✕</button></div>
+      <div class="modal-body help-grid">
+        <div><kbd>Space</kbd> 재생 / 정지</div>
+        <div><kbd>R</kbd> / <kbd>F12</kbd> 녹음</div>
+        <div><kbd>Home</kbd> / <kbd>Enter</kbd> 처음으로</div>
+        <div><kbd>End</kbd> 세션 끝으로</div>
+        <div><kbd>←</kbd> <kbd>→</kbd> 한 박자 이동</div>
+        <div><kbd>L</kbd> 루프 재생</div>
+        <div><kbd>K</kbd> 메트로놈</div>
+        <div><kbd>M</kbd> 마커 추가</div>
+        <div><kbd>1</kbd> 그래버 <kbd>2</kbd> 셀렉터 <kbd>3</kbd> 가위</div>
+        <div><kbd>G</kbd> 그리드 스냅</div>
+        <div><kbd>B</kbd> / <kbd>Ctrl+E</kbd> 분할</div>
+        <div><kbd>F</kbd> 선택 클립에 짧은 페이드</div>
+        <div><kbd>Alt+↑/↓</kbd> 클립 게인 ±1 dB</div>
+        <div><kbd>Delete</kbd> 클립 / 선택 구간 삭제</div>
+        <div><kbd>Ctrl+C / X / V</kbd> 복사 / 잘라내기 / 붙여넣기</div>
+        <div><kbd>Ctrl+D</kbd> 복제</div>
+        <div><kbd>Ctrl+A</kbd> 모든 클립 선택</div>
+        <div><kbd>Ctrl+Z</kbd> 실행 취소 · <kbd>Ctrl+Shift+Z</kbd> 다시 실행</div>
+        <div><kbd>+</kbd> <kbd>-</kbd> 확대 / 축소 · <kbd>Z</kbd> 전체</div>
+        <div><kbd>Ctrl+휠</kbd> 마우스 위치 기준 확대</div>
+        <div><kbd>=</kbd> 편집 창 ↔ 믹스 창</div>
+        <div><kbd>Ctrl+Shift+N</kbd> 새 트랙</div>
+        <div><kbd>Ctrl+I</kbd> 오디오 가져오기</div>
+        <div><kbd>Ctrl+Shift+B</kbd> 바운스</div>
+        <div><kbd>Ctrl+S</kbd> 저장 · <kbd>Ctrl+O</kbd> 열기</div>
+        <div><kbd>Shift+클릭</kbd> 클립 다중 선택</div>
+        <div>클립 더블클릭: 이름 변경</div>
+        <div>페이더/팬 더블클릭: 초기화</div>
+      </div>
+    </div>
+  </div>
+
+  <input type="file" id="file-audio" accept="audio/*,video/*,.wav,.mp3,.ogg,.flac,.m4a,.aif,.aiff" multiple hidden>
+  <input type="file" id="file-project" accept=".reaproj,.json" hidden>
+
+  <script src="js/util.js"></script>
+  <script src="js/effects.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/engine.js"></script>
+  <script src="js/editview.js"></script>
+  <script src="js/mixview.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
