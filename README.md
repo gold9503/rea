@@ -21,6 +21,31 @@ python3 -m http.server 8000
 그다음 브라우저에서 `http://localhost:8000` 을 엽니다.
 GitHub Pages 등 아무 정적 호스팅에 올려도 그대로 동작합니다.
 
+### 3) 데스크톱 앱 (macOS `.app` / Windows `.exe`)
+
+GitHub 저장소의 **Releases** 페이지(`desktop-build-…`)에서 내려받습니다. 브랜치에 푸시할 때마다 GitHub Actions(`.github/workflows/desktop.yml`)가 실제 macOS·Windows 머신에서 새로 빌드합니다.
+
+| 파일 | 용도 |
+| --- | --- |
+| `REA-Studio-<버전>-mac.dmg` | macOS (Intel + Apple Silicon). 열어서 `REA Studio.app`을 응용 프로그램 폴더로 끌어 놓기 |
+| `REA-Studio-<버전>-mac.zip` | 같은 `.app`을 zip으로 묶은 것 |
+| `REA-Studio-Setup-<버전>.exe` | Windows 10/11 설치 프로그램 |
+| `REA-Studio-<버전>-portable.exe` | Windows 설치 없이 바로 실행 |
+
+코드 서명 인증서(유료)를 쓰지 않았으므로 처음 실행할 때 경고가 뜹니다.
+
+- **macOS**: 처음 열 때 차단되면 *시스템 설정 → 개인정보 보호 및 보안 → "그래도 열기"* 를 누릅니다. 그래도 안 되면 터미널에서 `xattr -cr "/Applications/REA Studio.app"` 를 실행합니다. 녹음하려면 마이크 권한을 허용하세요.
+- **Windows**: SmartScreen 창이 뜨면 *추가 정보 → 실행* 을 누릅니다.
+
+직접 빌드하려면 (각 운영체제에서):
+
+```bash
+npm ci
+npm run dist:mac   # macOS에서 → dist/*.dmg, dist/*.zip
+npm run dist:win   # Windows에서 → dist/*.exe
+npm start          # 빌드 없이 데스크톱 창으로 실행
+```
+
 ## 기능
 
 | 영역 | 내용 |
@@ -61,6 +86,8 @@ js/editview.js    편집 창: 눈금자, 트랙 헤더, 타임라인 그리기�
 js/mixview.js     믹스 창: 채널 스트립, 인서트, 이펙트 편집 창
 js/storage.js     IndexedDB 자동 저장
 js/app.js         상태 관리, 실행 취소, 작업(분할/복사/…) , 파일 입출력, 단축키
+desktop/main.js   데스크톱(Electron) 래퍼
+.github/workflows/desktop.yml  macOS / Windows 자동 빌드
 ```
 
 외부 라이브러리 없이 순수 JavaScript + Web Audio API 로만 작성되었습니다.

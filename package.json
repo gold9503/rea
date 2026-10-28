@@ -1,0 +1,85 @@
+{
+  "name": "rea-studio",
+  "productName": "REA Studio",
+  "version": "0.1.0",
+  "description": "Free open-source multitrack audio workstation",
+  "license": "MIT",
+  "author": "REA Studio contributors",
+  "main": "desktop/main.js",
+  "scripts": {
+    "start": "electron .",
+    "dist:mac": "electron-builder --mac --publish never",
+    "dist:win": "electron-builder --win --publish never"
+  },
+  "devDependencies": {
+    "electron": "45.1.0",
+    "electron-builder": "26.0.12"
+  },
+  "build": {
+    "appId": "io.github.gold9503.rea-studio",
+    "productName": "REA Studio",
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "files": [
+      "index.html",
+      "css/**",
+      "js/**",
+      "desktop/**",
+      "LICENSE"
+    ],
+    "mac": {
+      "category": "public.app-category.music",
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "universal"
+          ]
+        },
+        {
+          "target": "zip",
+          "arch": [
+            "universal"
+          ]
+        }
+      ],
+      "icon": "build/icon.png",
+      "identity": "-",
+      "hardenedRuntime": false,
+      "extendInfo": {
+        "NSMicrophoneUsageDescription": "REA Studio는 오디오 녹음을 위해 마이크를 사용합니다."
+      },
+      "artifactName": "REA-Studio-${version}-mac.${ext}"
+    },
+    "dmg": {
+      "artifactName": "REA-Studio-${version}-mac.${ext}"
+    },
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "build/icon.png"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "artifactName": "REA-Studio-Setup-${version}.${ext}"
+    },
+    "portable": {
+      "artifactName": "REA-Studio-${version}-portable.${ext}"
+    }
+  }
+}
